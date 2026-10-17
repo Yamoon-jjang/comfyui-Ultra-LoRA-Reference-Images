@@ -1,0 +1,271 @@
+{
+  "_UltraExactSaveImage": {
+    "display_name": "Ultra Exact PNG & Caption Saver (Internal)",
+    "description": "Internal helper node that saves a PNG and a same-name TXT caption into the current LoRA dataset folder.",
+    "inputs": {
+      "images": {
+        "name": "Images",
+        "tooltip": "Images to save as PNG files.",
+        "description": "Images to save as PNG files."
+      },
+      "filename_stem": {
+        "name": "Filename",
+        "tooltip": "Filename without the .png or .txt extension.",
+        "description": "Filename without the .png or .txt extension."
+      },
+      "caption": {
+        "name": "Caption",
+        "tooltip": "Text written to the TXT file with the same filename as the PNG.",
+        "description": "Text written to the TXT file with the same filename as the PNG."
+      },
+      "date_subfolder": {
+        "name": "Dataset Subfolder",
+        "tooltip": "Run-specific subfolder under output/lora_dataset.",
+        "description": "Run-specific subfolder under output/lora_dataset."
+      },
+      "dataset_plan": {
+        "name": "Dataset Plan",
+        "tooltip": "Internal expected-file plan used to remove progress markers only after every variant is saved successfully.",
+        "description": "Internal expected-file plan used to remove progress markers only after every variant is saved successfully."
+      }
+    }
+  },
+  "UltraLoRAPngCaptionVariants": {
+    "display_name": "🎴 Ultra LoRA PNG & Caption Variants",
+    "description": "Generates the image variants defined in the JSON list and saves each result as a PNG with a same-name TXT caption under ComfyUI/output/lora_dataset/<run folder>.",
+    "inputs": {
+      "model": {
+        "name": "Model",
+        "tooltip": "Diffusion model used to generate all variants.",
+        "description": "Diffusion model used to generate all variants."
+      },
+      "clip": {
+        "name": "CLIP / Text Encoder",
+        "tooltip": "Text encoder used by the Qwen Image Edit prompt encoder.",
+        "description": "Text encoder used by the Qwen Image Edit prompt encoder."
+      },
+      "vae": {
+        "name": "VAE",
+        "tooltip": "VAE used to encode the reference image and decode generated images.",
+        "description": "VAE used to encode the reference image and decode generated images."
+      },
+      "image": {
+        "name": "Reference Image",
+        "tooltip": "Source portrait used as the identity and appearance reference for all variants.",
+        "description": "Source portrait used as the identity and appearance reference for all variants."
+      },
+      "negative": {
+        "name": "Negative Conditioning",
+        "tooltip": "Negative conditioning shared by all generated variants.",
+        "description": "Negative conditioning shared by all generated variants."
+      },
+      "latent_image": {
+        "name": "Latent Image",
+        "tooltip": "Starting latent shared by all generated variants.",
+        "description": "Starting latent shared by all generated variants."
+      },
+      "trigger": {
+        "name": "Trigger Token",
+        "tooltip": "Optional LoRA trigger token placed at the beginning of every TXT caption.",
+        "description": "Optional LoRA trigger token placed at the beginning of every TXT caption."
+      },
+      "subject": {
+        "name": "Subject Description",
+        "tooltip": "Common subject description added to every TXT caption, for example: a korean woman.",
+        "description": "Common subject description added to every TXT caption, for example: a korean woman."
+      },
+      "variants_json": {
+        "name": "Variant List (JSON)",
+        "tooltip": "JSON array of variants. Each item requires filename and prompt; caption is optional. The included default contains 24 face-angle and expression variants. Unsafe, reserved, duplicate, or excessively long filenames are rejected before generation.",
+        "description": "JSON array of variants. Each item requires filename and prompt; caption is optional. The included default contains 24 face-angle and expression variants. Unsafe, reserved, duplicate, or excessively long filenames are rejected before generation."
+      },
+      "seed": {
+        "name": "Seed",
+        "tooltip": "Seed used for generation. The control-after-generate setting determines how it changes between runs.",
+        "description": "Seed used for generation. The control-after-generate setting determines how it changes between runs."
+      },
+      "steps": {
+        "name": "Steps",
+        "tooltip": "Sampling steps used for every variant.",
+        "description": "Sampling steps used for every variant."
+      },
+      "cfg": {
+        "name": "CFG",
+        "tooltip": "Classifier-free guidance value used for every variant.",
+        "description": "Classifier-free guidance value used for every variant."
+      },
+      "sampler_name": {
+        "name": "Sampler",
+        "tooltip": "Sampler used for every variant.",
+        "description": "Sampler used for every variant."
+      },
+      "scheduler": {
+        "name": "Scheduler",
+        "tooltip": "Scheduler used for every variant.",
+        "description": "Scheduler used for every variant."
+      },
+      "denoise": {
+        "name": "Denoise",
+        "tooltip": "Denoising strength used for every variant.",
+        "description": "Denoising strength used for every variant."
+      }
+    }
+  },
+  "UltraLoRAReferenceImages": {
+    "display_name": "🎴 Ultra LoRA Reference Images",
+    "description": "Automatically generates reference images and TXT captions for character LoRA training with Qwen Image Edit 2511 or Qwen Image 2.1. Choose the required model, text encoder, and VAE directly inside the node.",
+    "inputs": {
+      "얼굴_참조_이미지": {
+        "name": "Face Reference Image",
+        "tooltip": "The only reference image in face-only mode. In balanced mode it is used as image2 and defines facial identity, facial structure, skin tone, age, hairstyle, and hairline.",
+        "description": "The only reference image in face-only mode. In balanced mode it is used as image2 and defines facial identity, facial structure, skin tone, age, hairstyle, and hairline."
+      },
+      "트리거": {
+        "name": "Trigger Token",
+        "tooltip": "Optional LoRA trigger token placed at the beginning of every saved TXT caption.",
+        "description": "Optional LoRA trigger token placed at the beginning of every saved TXT caption."
+      },
+      "피사체": {
+        "name": "Subject Description",
+        "tooltip": "Common subject description added to every saved TXT caption, for example: a korean woman.",
+        "description": "Common subject description added to every saved TXT caption, for example: a korean woman."
+      },
+      "생성_모드": {
+        "name": "Generation Mode",
+        "tooltip": "Face-only creates face-focused images only, and outfit diversity does not meaningfully apply. Balanced creates both face images and body-framing images, and outfit diversity applies only to the upper-body, thighs-up, and full-body images.",
+        "description": "Face-only creates face-focused images only, and outfit diversity does not meaningfully apply. Balanced creates both face images and body-framing images, and outfit diversity applies only to the upper-body, thighs-up, and full-body images."
+      },
+      "배치수": {
+        "name": "Image Count",
+        "tooltip": "24 is the most compact set, 30 is the default recommended balance, and 40 is the expanded set with more framing and viewpoint variety. Use 40 when you plan to review and curate the results.",
+        "description": "24 is the most compact set, 30 is the default recommended balance, and 40 is the expanded set with more framing and viewpoint variety. Use 40 when you plan to review and curate the results."
+      },
+      "조명_옵션": {
+        "name": "Lighting",
+        "tooltip": "사용안함 omits explicit lighting instructions. 안정적분산 distributes safer lighting matched to the background, and 다양한분산 uses a broader lighting range.",
+        "description": "사용안함 omits explicit lighting instructions. 안정적분산 distributes safer lighting matched to the background, and 다양한분산 uses a broader lighting range."
+      },
+      "의상_다양성": {
+        "name": "Outfit Diversity",
+        "tooltip": "Has little to no effect in face-only mode. It only controls how many outfit types are used by the balanced upper-body, thighs-up, and full-body images.",
+        "description": "Has little to no effect in face-only mode. It only controls how many outfit types are used by the balanced upper-body, thighs-up, and full-body images."
+      },
+      "배경_옵션": {
+        "name": "Background",
+        "tooltip": "Controls the range of simple backgrounds. Backgrounds are kept visually separated from the person and are constrained not to overlap the subject.",
+        "description": "Controls the range of simple backgrounds. Backgrounds are kept visually separated from the person and are constrained not to overlap the subject."
+      },
+      "표정_변화": {
+        "name": "Expression Diversity",
+        "tooltip": "Controls expression range. 낮음 focuses on neutral and gentle smiles; 보통 adds sadness, a big laugh, playful cute expressions, and serious looks; 높음 also adds anger, surprise, a wink, worry, and determined expressions. Face-only and balanced face images use broader expression diversity, while balanced body images use strong expressions more sparingly. Views from above and below always use a natural neutral expression and an upright head so camera perspective remains the main learning target.",
+        "description": "Controls expression range. 낮음 focuses on neutral and gentle smiles; 보통 adds sadness, a big laugh, playful cute expressions, and serious looks; 높음 also adds anger, surprise, a wink, worry, and determined expressions. Face-only and balanced face images use broader expression diversity, while balanced body images use strong expressions more sparingly. Views from above and below always use a natural neutral expression and an upright head so camera perspective remains the main learning target."
+      },
+      "정체성_보존": {
+        "name": "Identity Preservation",
+        "tooltip": "Controls how strongly the Qwen edit prompt locks facial identity. Stronger settings improve recognizability but can reduce the strength of large viewpoint changes.",
+        "description": "Controls how strongly the Qwen edit prompt locks facial identity. Stronger settings improve recognizability but can reduce the strength of large viewpoint changes."
+      },
+      "seed": {
+        "name": "Seed",
+        "tooltip": "Seed shared by the generated variants in the current run.",
+        "description": "Seed shared by the generated variants in the current run."
+      },
+      "steps": {
+        "name": "Steps",
+        "tooltip": "Sampling step count used for every variant.",
+        "description": "Sampling step count used for every variant."
+      },
+      "cfg": {
+        "name": "CFG",
+        "tooltip": "CFG value used for every variant.",
+        "description": "CFG value used for every variant."
+      },
+      "sampler_name": {
+        "name": "Sampler",
+        "tooltip": "Sampler used for every variant.",
+        "description": "Sampler used for every variant."
+      },
+      "scheduler": {
+        "name": "Scheduler",
+        "tooltip": "Scheduler used for every variant.",
+        "description": "Scheduler used for every variant."
+      },
+      "denoise": {
+        "name": "Denoise",
+        "tooltip": "Denoising strength used for every variant.",
+        "description": "Denoising strength used for every variant."
+      },
+      "출력_비율": {
+        "name": "Output Aspect Ratio",
+        "tooltip": "Original Ratio keeps the current reference image ratio and the legacy graph path. Auto by Framing assigns 3:4 to faces and upper-body shots, and 2:3 to head-and-shoulders / thigh-up / full-body shots without cropping the subject. The selected model variant does not change this ratio policy.",
+        "description": "Original Ratio keeps the current reference image ratio and the legacy graph path. Auto by Framing assigns 3:4 to faces and upper-body shots, and 2:3 to head-and-shoulders / thigh-up / full-body shots without cropping the subject. The selected model variant does not change this ratio policy."
+      },
+      "모델_계열": {
+        "name": "Model Variant",
+        "tooltip": "Choose the legacy 2511 edit graph or the dedicated Qwen Image 2.1 TextEncodeQwenImage21 graph. Internal LoRA rows, order, strength, and enabled state are remembered separately per model family.",
+        "description": "Choose the legacy 2511 edit graph or the dedicated Qwen Image 2.1 TextEncodeQwenImage21 graph. Internal LoRA rows, order, strength, and enabled state are remembered separately per model family."
+      },
+      "2511_확산모델": {
+        "name": "2511 Diffusion Model",
+        "tooltip": "UNET / diffusion_models file used for Qwen Image Edit 2511. The node loads it internally, so no external MODEL input is required.",
+        "description": "UNET / diffusion_models file used for Qwen Image Edit 2511. The node loads it internally, so no external MODEL input is required."
+      },
+      "2511_텍스트인코더": {
+        "name": "2511 Text Encoder",
+        "tooltip": "Text encoder file used for Qwen Image Edit 2511. Usually this is a Qwen2.5-VL family encoder.",
+        "description": "Text encoder file used for Qwen Image Edit 2511. Usually this is a Qwen2.5-VL family encoder."
+      },
+      "2511_VAE": {
+        "name": "2511 VAE",
+        "tooltip": "VAE file used for Qwen Image Edit 2511.",
+        "description": "VAE file used for Qwen Image Edit 2511."
+      },
+      "2.1_확산모델": {
+        "name": "2.1 Diffusion Model",
+        "tooltip": "UNET / diffusion_models file used for Qwen Image 2.1. The node loads it internally, so no external MODEL input is required.",
+        "description": "UNET / diffusion_models file used for Qwen Image 2.1. The node loads it internally, so no external MODEL input is required."
+      },
+      "2.1_텍스트인코더": {
+        "name": "2.1 Text Encoder",
+        "tooltip": "Text encoder file used for Qwen Image 2.1.",
+        "description": "Text encoder file used for Qwen Image 2.1."
+      },
+      "2.1_VAE": {
+        "name": "2.1 VAE",
+        "tooltip": "VAE file used for Qwen Image 2.1.",
+        "description": "VAE file used for Qwen Image 2.1."
+      },
+      "2.1_캐시_장치": {
+        "name": "2.1 Cache Device",
+        "tooltip": "Device option for the internal QwenImage21Cache step. It is applied only when that node exists in the current ComfyUI build.",
+        "description": "Device option for the internal QwenImage21Cache step. It is applied only when that node exists in the current ComfyUI build."
+      },
+      "2.1_캐시_정밀도": {
+        "name": "2.1 Cache Dtype",
+        "tooltip": "Cache precision option for the internal QwenImage21Cache step.",
+        "description": "Cache precision option for the internal QwenImage21Cache step."
+      },
+      "밸런스_참조_이미지_상반신이상": {
+        "name": "Balance Reference Image (upper body to thighs recommended)",
+        "tooltip": "Used as image1 in balanced mode. It defines body proportions, body shape, framing, pose, and the high/low camera viewpoint baseline. Required for actual generation. Use at least an upper-body image, and preferably an upper-body to thighs-up image.",
+        "description": "Used as image1 in balanced mode. It defines body proportions, body shape, framing, pose, and the high/low camera viewpoint baseline. Required for actual generation. Use at least an upper-body image, and preferably an upper-body to thighs-up image."
+      }
+    }
+  },
+  "_UltraAspectFitImage": {
+    "display_name": "Ultra Aspect Fit (Internal)",
+    "description": "Internal helper that preserves the full reference image on a 3:4 or 2:3 canvas for automatic framing ratios.",
+    "inputs": {
+      "image": {
+        "name": "Image",
+        "tooltip": "Internal helper that preserves the full reference image on a 3:4 or 2:3 canvas for automatic framing ratios.",
+        "description": "Internal helper that preserves the full reference image on a 3:4 or 2:3 canvas for automatic framing ratios."
+      },
+      "aspect": {
+        "name": "Aspect Ratio",
+        "tooltip": "Target ratio used by automatic framing.",
+        "description": "Target ratio used by automatic framing."
+      }
+    }
+  }
+}

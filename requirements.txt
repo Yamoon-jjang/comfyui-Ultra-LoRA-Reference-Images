@@ -1,0 +1,2 @@
+# Ultra LoRA Reference Images installs no third-party dependency.
+# torch, numpy, Pillow and aiohttp are provided by ComfyUI itself.
