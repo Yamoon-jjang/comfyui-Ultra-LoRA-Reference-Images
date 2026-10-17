@@ -1,6 +1,6 @@
 [project]
 name = "comfyui-ultra-lora-reference-images"
-version = "1.0.0"
+version = "1.0.1"
 description = "Generate 24/30/40 reference images of one person with varied expressions, head angles, framings, outfits and backgrounds - for character sheets, pose references and LoRA datasets (PNG + TXT captions). Qwen Image Edit 2511 / Qwen Image 2.1."
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
