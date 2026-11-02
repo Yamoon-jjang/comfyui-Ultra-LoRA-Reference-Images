@@ -2,6 +2,12 @@
 
 **인물 사진 한두 장만 넣으면, 같은 인물의 다양한 표정·얼굴 각도·구도·의상·배경을 담은 이미지 24 / 30 / 40장을 한 번에 만들어 주는 ComfyUI 노드입니다.**
 
+### 🖼️ 프로그램 화면 / Application preview
+
+![Ultra LoRA Reference Images — ComfyUI node and generated reference images with matching TXT captions](./Ultra-LoRA-Reference-Images.webp)
+
+*Ultra LoRA Reference Images — 얼굴·밸런스 모드에서 24 / 30 / 40장의 인물 참조 이미지와 각 이미지에 대응하는 TXT 캡션을 생성합니다.*
+
 이렇게 쓸 수 있습니다.
 - **캐릭터 시트 / 표정 모음:** 한 인물의 여러 표정과 각도를 한자리에 모읍니다.
 - **포즈·구도 레퍼런스:** 같은 인물의 얼굴 클로즈업부터 상반신, 허벅지 위, 전신까지 고루 만듭니다.

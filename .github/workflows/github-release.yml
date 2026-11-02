@@ -1,0 +1,118 @@
+name: Publish GitHub Release
+
+# Create one GitHub Release for each pyproject.toml version.
+# Comfy Registry publishing is managed separately by publish.yml.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "README.md"
+      - "Ultra-LoRA-Reference-Images.webp"
+      - "pyproject.toml"
+      - ".github/workflows/github-release.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ultra-lora-reference-github-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the release source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read the project's actual version
+        id: version
+        shell: bash
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import tomllib
+          from pathlib import Path
+          metadata = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
+          version = metadata["project"]["version"]
+          assert version and all(c.isdigit() or c == "." for c in version), version
+          print(f"tag=v{version}")
+          print(f"archive=comfyui-Ultra-LoRA-Reference-Images_v{version}.zip")
+          PY
+
+      - name: Check whether this version already has a release
+        id: existing
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if gh release view "${{ steps.version.outputs.tag }}" > /dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Release already exists; leaving it unchanged."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create and validate the installable source ZIP
+        if: steps.existing.outputs.exists == 'false'
+        shell: bash
+        run: |
+          git -c core.quotepath=false archive --format=zip \
+            --prefix="comfyui-Ultra-LoRA-Reference-Images/" \
+            -o "${{ steps.version.outputs.archive }}" HEAD
+          python - <<'PY'
+          from zipfile import ZipFile
+          import glob
+          path = glob.glob("comfyui-Ultra-LoRA-Reference-Images_v*.zip")
+          assert len(path) == 1, path
+          prefix = "comfyui-Ultra-LoRA-Reference-Images/"
+          required = [
+              "README.md",
+              "Ultra-LoRA-Reference-Images.webp",
+              "pyproject.toml",
+              "reference_images.py",
+              "Ultra_LoRA_Reference_Images_메뉴얼.txt",
+              "예제/Ultra-LoRA-Reference-Images.json",
+          ]
+          with ZipFile(path[0]) as z:
+              assert z.testzip() is None, "Archive CRC validation failed"
+              filenames = set(z.namelist())
+              assert all(n.startswith(prefix) for n in filenames), "Unexpected ZIP prefix"
+              missing = [n for n in required if prefix + n not in filenames]
+              assert not missing, f"Required package files missing: {missing}"
+              print(f"Verified {len(filenames)} archive entries")
+          PY
+
+      - name: Publish GitHub Release and attach ZIP
+        if: steps.existing.outputs.exists == 'false'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+          RELEASE_ARCHIVE: ${{ steps.version.outputs.archive }}
+        run: |
+          cat > "$RUNNER_TEMP/release-notes.md" <<'EOF'
+          ## Ultra LoRA Reference Images
+
+          한두 장의 참조 사진을 이용해 동일 인물의 24 / 30 / 40장 이미지와 이미지별 TXT 캡션을 생성하는 ComfyUI 커스텀 노드입니다.
+
+          - 얼굴전용 모드: 표정, 얼굴 각도, 시선, 조명, 배경 다양화
+          - 밸런스 모드: 얼굴부터 전신까지 다양한 구도, 포즈 및 의상
+          - Qwen Image Edit 2511 및 Qwen Image 2.1 지원
+          - 한국어/영어 UI, 예제 워크플로우, 한글 메뉴얼 포함
+
+          **설치:** ZIP을 내려받아 압축 해제한 `comfyui-Ultra-LoRA-Reference-Images` 폴더를 `ComfyUI/custom_nodes/`에 넣고 ComfyUI를 재시작하세요. 또는 ComfyUI Manager에서 설치할 수 있습니다.
+
+          **모델:** 생성에는 별도의 Qwen 계열 모델 파일이 필요합니다. 상세 모델 설정은 README와 메뉴얼을 확인하세요.
+
+          ---
+          **English:** Generate 24/30/40 varied reference images of the same person and paired TXT captions for ComfyUI LoRA training. Face and Balance modes, Qwen Image Edit 2511 / Qwen Image 2.1 support, examples and Korean manual included.
+          EOF
+          gh release create "$RELEASE_TAG" "$RELEASE_ARCHIVE" \
+            --target "$GITHUB_SHA" \
+            --title "Ultra LoRA Reference Images $RELEASE_TAG" \
+            --notes-file "$RUNNER_TEMP/release-notes.md"
